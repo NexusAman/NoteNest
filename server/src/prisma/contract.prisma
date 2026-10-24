@@ -1,0 +1,22 @@
+// use prisma-8
+model User {
+  id        Uuid                 @id @onCreate(uuid(7))
+  name      String
+  email     String               @unique
+  password  String
+  createdAt temporal.createdAt()
+  updatedAt temporal.updatedAt()
+
+  note      Note[]
+}
+
+model Note {
+  id        Uuid                 @id @onCreate(uuid(7))
+  title     String
+  content   String               @default("")
+  createdAt temporal.createdAt()
+  updatedAt temporal.updatedAt()
+
+  userId    Uuid
+  user      User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
