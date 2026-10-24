@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import env from "./config/env";
+import notFoundMiddleware from "./middlewares/notFound.middleware.js";
+import errorMiddleware from "./middlewares/error.middleware.js";
 
 const app = express();
 
@@ -19,5 +21,8 @@ app.get("/health", (req, res) => {
     message: "NoteNest API is running!",
   });
 });
+
+app.use(notFoundMiddleware);
+app.use(errorMiddleware);
 
 export default app;
