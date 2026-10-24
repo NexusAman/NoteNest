@@ -1,4 +1,5 @@
-import 'dotenv/config';
+import "dotenv/config";
+import "temporal-polyfill/global";
 import postgres from '@prisma/orm-postgres/runtime';
 import { contractFromJson } from '@prisma/orm-postgres/static';
 import type { Contract } from './contract.d';
@@ -8,5 +9,4 @@ export const contract = contractFromJson<Contract>(contractJson);
 
 export const db = postgres({
   contract,
-  url: process.env['DATABASE_URL']!,
 });
