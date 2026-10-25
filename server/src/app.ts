@@ -1,9 +1,10 @@
 import express from "express";
 import cors from "cors";
-import env from "./config/env";
+import cookieParser from "cookie-parser";
+import env from "./config/env.js";
 import notFoundMiddleware from "./middlewares/notFound.middleware.js";
 import errorMiddleware from "./middlewares/error.middleware.js";
-import authRoutes from "./features/auth/auth.routes.js"
+import authRoutes from "./features/auth/auth.routes.js";
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.use(
 );
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.get("/health", (req, res) => {
   res.status(200).json({

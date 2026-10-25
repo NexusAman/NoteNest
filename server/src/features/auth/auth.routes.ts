@@ -1,10 +1,10 @@
 import express, { Router } from "express";
-import { signupController } from "./auth.controller.js";
+import { loginController, signupController } from "./auth.controller.js";
 
 const router = Router();
 
 router.post("/signup", signupController);
-// router.post("/login");
+router.post("/login", loginController);
 // router.get("/me");
 // router.post("/logout");
 

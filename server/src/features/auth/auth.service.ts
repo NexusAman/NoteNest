@@ -1,13 +1,14 @@
-import type { SignupInput } from "./auth.schema.js";
+import type { SignupInput, LoginInput } from "./auth.schema.js";
 import { db } from "../../prisma/db.js";
 import ApiError from "../../utils/ApiError.js";
-import { hashPassword } from "../../utils/password.js";
+import { comparePassword, hashPassword } from "../../utils/password.js";
+import { generateToken } from "../../utils/jwt.js";
 
 const signup = async ({ name, email, password }: SignupInput) => {
   const existingUser = await db.orm.public.User.where({ email: email }).first();
 
   if (existingUser) {
-    throw new ApiError(409, "Email already, exists");
+    throw new ApiError(409, "Email already exists");
   }
 
   const hashedPassword = await hashPassword(password);
@@ -19,9 +20,36 @@ const signup = async ({ name, email, password }: SignupInput) => {
   });
 
   return {
+    id: user.id,
+    name: user.name,
     email: user.email,
     createdAt: user.createdAt,
   };
 };
 
-export { signup };
+const login = async ({ email, password }: LoginInput) => {
+  const user = await db.orm.public.User.where({ email }).first();
+
+  if (!user) {
+    throw new ApiError(401, "Invalid email or password");
+  }
+
+  const isPasswordValid = await comparePassword(password, user.password);
+
+  if (!isPasswordValid) {
+    throw new ApiError(401, "Invalid email or password");
+  }
+
+  const token = generateToken(user.id);
+
+  return {
+    token,
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    },
+  };
+};
+
+export { signup, login };

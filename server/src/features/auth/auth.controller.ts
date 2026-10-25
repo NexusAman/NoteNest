@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
-import { signupSchema } from "./auth.schema.js";
+import { loginSchema, signupSchema } from "./auth.schema.js";
 import ApiError from "../../utils/ApiError.js";
-import { signup } from "./auth.service.js";
+import { login, signup } from "./auth.service.js";
 
 const signupController = async (req: Request, res: Response) => {
   const result = signupSchema.safeParse(req.body);
@@ -9,13 +9,13 @@ const signupController = async (req: Request, res: Response) => {
   if (!result.success) {
     const errors: Record<string, string> = {};
 
-    for (const issue of result.error.issues) {
+    result.error.issues.forEach((issue) => {
       const field = issue.path[0];
 
       if (typeof field === "string") {
         errors[field] = issue.message;
       }
-    }
+    });
 
     throw new ApiError(400, "Validation failed", errors);
   }
@@ -25,8 +25,41 @@ const signupController = async (req: Request, res: Response) => {
   res.status(201).json({
     success: true,
     message: "User created successfully",
-    user,
+    data: user,
   });
 };
 
-export { signupController };
+const loginController = async (req: Request, res: Response) => {
+  const result = loginSchema.safeParse(req.body);
+
+  if (!result.success) {
+    const errors: Record<string, string> = {};
+
+    result.error.issues.forEach((issue) => {
+      const field = issue.path[0];
+
+      if (typeof field === "string") {
+        errors[field] = issue.message;
+      }
+    });
+
+    throw new ApiError(400, "Validation failed", errors);
+  }
+
+  const { token, user } = await login(result.data);
+
+  res.cookie("accessToken", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 24 * 60 * 60 * 1000,
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Login successful",
+    data: user,
+  });
+};
+
+export { signupController, loginController };
