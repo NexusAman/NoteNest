@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { loginSchema, signupSchema } from "./auth.schema.js";
 import ApiError from "../../utils/ApiError.js";
-import { login, signup } from "./auth.service.js";
+import { getCurrentUser, login, signup } from "./auth.service.js";
 
 const signupController = async (req: Request, res: Response) => {
   const result = signupSchema.safeParse(req.body);
@@ -52,6 +52,7 @@ const loginController = async (req: Request, res: Response) => {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
+    path: "/",
     maxAge: 24 * 60 * 60 * 1000,
   });
 
@@ -62,4 +63,29 @@ const loginController = async (req: Request, res: Response) => {
   });
 };
 
-export { signupController, loginController };
+const meController = async (req: Request, res: Response) => {
+  const user = await getCurrentUser({
+    userId: req.user!.id,
+  });
+
+  res.status(200).json({
+    success: true,
+    data: user,
+  });
+};
+
+const logoutController = (_req: Request, res: Response) => {
+  res.clearCookie("accessToken", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Logout Successfully",
+  });
+};
+
+export { signupController, loginController, meController, logoutController };

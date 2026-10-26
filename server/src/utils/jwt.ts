@@ -13,4 +13,8 @@ const generateToken = (userId: string): string => {
   );
 };
 
-export { generateToken };
+const verifyToken = (token: string): { userId: string } => {
+  return jwt.verify(token, env.jwtSecret) as { userId: string };
+};
+
+export { generateToken, verifyToken };

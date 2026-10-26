@@ -52,4 +52,24 @@ const login = async ({ email, password }: LoginInput) => {
   };
 };
 
-export { signup, login };
+interface CurrentUserInput {
+  userId: string;
+}
+
+const getCurrentUser = async ({ userId }: CurrentUserInput) => {
+  const user = await db.orm.public.User.where({ id: userId }).first();
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+  };
+};
+
+export { signup, login, getCurrentUser};
