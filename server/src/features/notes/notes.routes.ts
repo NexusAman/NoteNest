@@ -1,13 +1,19 @@
 import { Router } from "express";
 import authMiddleware from "../../middlewares/auth.middleware.js";
-import { createNoteController } from "./notes.controller.js";
+import {
+  createNoteController,
+  deleteNoteController,
+  getNoteByIdController,
+  getNotesController,
+  updateNoteController,
+} from "./notes.controller.js";
 
 const router = Router();
 
-// router.get('/');
-router.post('/', authMiddleware, createNoteController);
-// router.get('/:id');
-// router.patch('/:id');
-// router.delete('/:id');
+router.get("/", authMiddleware, getNotesController);
+router.post("/", authMiddleware, createNoteController);
+router.get("/:id", authMiddleware, getNoteByIdController);
+router.patch("/:id", authMiddleware, updateNoteController);
+router.delete("/:id", authMiddleware, deleteNoteController);
 
 export default router;
