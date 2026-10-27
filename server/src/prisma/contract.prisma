@@ -7,16 +7,40 @@ model User {
   createdAt temporal.createdAt()
   updatedAt temporal.updatedAt()
 
-  note      Note[]
+  notes      Note[]
+  categories Category[]
 }
 
 model Note {
+  id         Uuid                 @id @onCreate(uuid(7))
+  title      String
+  content    String?
+  userId     Uuid
+  categoryId Uuid
+  isFavorite Boolean              @default(false)
+  isPinned   Boolean              @default(false)
+  createdAt  temporal.createdAt()
+  updatedAt  temporal.updatedAt()
+
+  user       User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category   Category             @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  @@index([userId])
+  @@index([categoryId])
+}
+
+model Category {
   id        Uuid                 @id @onCreate(uuid(7))
-  title     String
-  content   String               @default("")
+  name      String
+  color     String               @default("#6366F1")
+  userId    Uuid
+  isDefault Boolean              @default(false)
   createdAt temporal.createdAt()
   updatedAt temporal.updatedAt()
 
-  userId    Uuid
   user      User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notes     Note[]
+
+  @@unique([userId, name])
+  @@index([userId])
 }
