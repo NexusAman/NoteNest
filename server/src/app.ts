@@ -5,7 +5,8 @@ import env from "./config/env.js";
 import notFoundMiddleware from "./middlewares/notFound.middleware.js";
 import errorMiddleware from "./middlewares/error.middleware.js";
 import authRoutes from "./features/auth/auth.routes.js";
-import notesRoutes from "./features/notes/notes.routes.js"
+import notesRoutes from "./features/notes/notes.routes.js";
+import categoriesRoutes from "./features/notes/categories/categories.routes.js";
 
 const app = express();
 
@@ -27,7 +28,8 @@ app.get("/health", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
-app.use("/api/notes", notesRoutes)
+app.use("/api/notes", notesRoutes);
+app.use("/api/categories", categoriesRoutes);
 
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
