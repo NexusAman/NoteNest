@@ -41,6 +41,10 @@ model Category {
   user      User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   notes     Note[]
 
-  @@unique([userId, name])
+  @@index(
+    expression: sql`"userId", lower(name)`,
+    unique: true,
+    name: "category_user_lower_name"
+  )
   @@index([userId])
 }

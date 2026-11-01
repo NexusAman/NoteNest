@@ -8,8 +8,14 @@ const createCategorySchema = z.object({
     .max(50, "Category name must not exceed 50 characters"),
   color: z
     .string()
-    .regex(/^#[0-9A-Fa-f]{6}$/, "Color must be a valid hex color")
-    .optional(),
+    .trim()
+    .transform((value) => (value === "" ? undefined : value))
+    .pipe(
+      z
+        .string()
+        .regex(/^#[0-9A-Fa-f]{6}$/)
+        .optional(),
+    ),
 });
 
 const updateCategorySchema = z

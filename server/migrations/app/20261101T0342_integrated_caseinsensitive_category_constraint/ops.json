@@ -1,0 +1,99 @@
+[
+  {
+    "id": "dropConstraint.Category.Category_userId_name_key",
+    "label": "Drop constraint \"Category_userId_name_key\" on \"Category\"",
+    "operationClass": "widening",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "Category_userId_name_key",
+        "table": "Category"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Category_userId_name_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Category_userId_name_key",
+          "public",
+          "\"public\".\"Category\""
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "constraint \"Category_userId_name_key\" on \"Category\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop constraint \"Category_userId_name_key\"",
+        "sql": "ALTER TABLE \"public\".\"Category\" DROP CONSTRAINT \"Category_userId_name_key\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"Category_userId_name_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Category_userId_name_key",
+          "public",
+          "\"public\".\"Category\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"Category_userId_name_key\" on \"Category\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "index.Category.category_user_lower_name_876879a5",
+    "label": "Create index \"category_user_lower_name_876879a5\" on \"Category\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "category_user_lower_name_876879a5",
+        "table": "Category"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"category_user_lower_name_876879a5\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"category_user_lower_name_876879a5\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"category_user_lower_name_876879a5\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"category_user_lower_name_876879a5\"",
+        "sql": "CREATE UNIQUE INDEX \"category_user_lower_name_876879a5\" ON \"public\".\"Category\" (\"userId\", lower(name))",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"category_user_lower_name_876879a5\" exists on \"Category\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND \"i\".\"indisunique\" AND \"m\".\"amname\" = $5 AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"category_user_lower_name_876879a5\"",
+          "i",
+          "I",
+          "\"public\".\"Category\"",
+          "btree"
+        ]
+      }
+    ]
+  }
+]

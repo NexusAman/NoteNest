@@ -6,6 +6,18 @@ import type {
   UpdateCategoryInput,
 } from "./categories.schema.js";
 
+const isUniqueConstraintViolation = (error: unknown): boolean => {
+  if (typeof error !== "object" || error === null) {
+    return false;
+  }
+
+  if ("code" in error && error.code === "23505") {
+    return true;
+  }
+
+  return "cause" in error && isUniqueConstraintViolation(error.cause);
+};
+
 const createCategory = async (userId: string, input: CreateCategoryInput) => {
   const existingCategory = await db.orm.public.Category.where({
     userId,
@@ -16,13 +28,21 @@ const createCategory = async (userId: string, input: CreateCategoryInput) => {
     throw new ApiError(409, "Category already exists");
   }
 
-  const category = db.orm.public.Category.create({
-    name: input.name,
-    ...(input.color !== undefined ? { color: input.color } : {}),
-    userId,
-  });
+  try {
+    const category = await db.orm.public.Category.create({
+      name: input.name,
+      ...(input.color !== undefined ? { color: input.color } : {}),
+      userId,
+    });
 
-  return category;
+    return category;
+  } catch (error) {
+    if (isUniqueConstraintViolation(error)) {
+      throw new ApiError(409, "Category already exists");
+    }
+
+    throw error;
+  }
 };
 
 const getCategories = async (userId: string) => {
@@ -66,15 +86,25 @@ const updateCategory = async (
     }
   }
 
-  const updatedCategory = await db.orm.public.Category.where({
-    userId,
-    id: id.id,
-  }).update({
-    ...(input.name !== undefined ? { name: input.name } : {}),
-    ...(input.color !== undefined ? { color: input.color } : {}),
-  });
+  try {
+    const updatedCategory = await db.orm.public.Category.where({
+      userId,
+      id: id.id,
+    }).update({
+      ...(input.name !== undefined ? { name: input.name } : {}),
+      ...(input.color !== undefined ? { color: input.color } : {}),
+    });
 
-  return updatedCategory;
+    return updatedCategory;
+  } catch (error) {
+    if (isUniqueConstraintViolation(error)) {
+      throw new ApiError(409, "Category name already exists", {
+        name: "A category with this name already exists",
+      });
+    }
+
+    throw error;
+  }
 };
 
 const deleteCategory = async (userId: string, input: CategoryIdInput) => {
