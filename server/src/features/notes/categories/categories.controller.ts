@@ -24,6 +24,8 @@ const createCategoryController = async (req: Request, res: Response) => {
 
       if (typeof field === "string") {
         errors[field] = issue.message;
+      } else {
+        errors._form = issue.message;
       }
     });
 
@@ -85,6 +87,8 @@ const updateCategoryController = async (req: Request, res: Response) => {
 
       if (typeof field === "string") {
         errors[field] = issue.message;
+      } else {
+        errors._form = issue.message;
       }
     });
 
