@@ -3,6 +3,7 @@ import { db } from "../../prisma/db.js";
 import ApiError from "../../utils/ApiError.js";
 import { comparePassword, hashPassword } from "../../utils/password.js";
 import { generateToken } from "../../utils/jwt.js";
+import DEFAULT_CATEGORIES from "../notes/categories/categories.constants.js";
 
 const signup = async ({ name, email, password }: SignupInput) => {
   const existingUser = await db.orm.public.User.where({ email: email }).first();
@@ -13,10 +14,21 @@ const signup = async ({ name, email, password }: SignupInput) => {
 
   const hashedPassword = await hashPassword(password);
 
-  const user = await db.orm.public.User.create({
-    name,
-    email,
-    password: hashedPassword,
+  const user = await db.transaction(async (tx) => {
+    const newUser = await tx.orm.public.User.create({
+      name,
+      email,
+      password: hashedPassword,
+    });
+
+    await tx.orm.public.Category.createAll(
+      DEFAULT_CATEGORIES.map((category) => ({
+        ...category,
+        userId: newUser.id,
+      })),
+    );
+
+    return newUser;
   });
 
   return {
