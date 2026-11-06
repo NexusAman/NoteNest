@@ -1,21 +1,16 @@
-import { Button } from "@/components/ui/button";
+import { Routes, Route } from "react-router";
+import LandingPage from "@/features/landing/pages/LandingPage";
+import Signup from "./features/auth/pages/Signup";
+import Login from "./features/auth/pages/Login";
 
-function App() {
+const App = () => {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-slate-50">
-      <h1 className="text-3xl font-bold text-slate-900">
-        Welcome to NoteNest
-      </h1>
-
-      <p className="text-slate-600">
-        Your thoughts, one place.
-      </p>
-
-      <Button>
-        Get Started Free
-      </Button>
-    </div>
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/signup" element={<Signup />} />
+      <Route path="/login" element={<Login />} />
+    </Routes>
   );
-}
+};
 
 export default App;
